@@ -1,0 +1,19 @@
+{
+  "name": "discord-mini",
+  "version": "1.0.0",
+  "description": "A mini Discord client on your taskbar - DM focused",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "keywords": ["discord", "electron", "taskbar", "dm"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "electron": "^35.7.5"
+  }
+}
