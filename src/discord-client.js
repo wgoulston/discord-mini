@@ -298,14 +298,44 @@ class DiscordClient extends EventEmitter {
    */
   static getTokenFromCredentials(email, password) {
     return new Promise((resolve, reject) => {
-      const data = JSON.stringify({ login: email, password, undelete: false });
+      const browserUserAgent =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.6099.291 Safari/537.36';
+      const xSuperProperties = Buffer.from(
+        JSON.stringify({
+          os: 'Windows',
+          browser: 'Chrome',
+          device: '',
+          system_locale: 'en-US',
+          browser_user_agent: browserUserAgent,
+          browser_version: '120.0.6099.291',
+          os_version: '10',
+          referrer: '',
+          referring_domain: '',
+          referrer_current: '',
+          referring_domain_current: '',
+          release_channel: 'stable',
+          client_build_number: CLIENT_PROPERTIES.client_build_number,
+          client_event_source: null,
+        }),
+      ).toString('base64');
+
+      const data = JSON.stringify({
+        login: email,
+        password,
+        undelete: false,
+        captcha_key: null,
+        login_source: null,
+        gift_code_sku_id: null,
+      });
       const options = {
         hostname: API_BASE,
         path: `${API_PATH}/auth/login`,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'User-Agent': 'DiscordMini/1.0.0 (discord-mini)',
+          'User-Agent': browserUserAgent,
+          'X-Super-Properties': xSuperProperties,
+          'X-Discord-Locale': 'en-US',
           'Content-Length': Buffer.byteLength(data),
         },
       };
