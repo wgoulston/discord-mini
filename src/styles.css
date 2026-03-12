@@ -338,7 +338,6 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); }
 /* ─── App view layout ───────────────────────────────────────────────────────── */
 #app-view {
   flex: 1;
-  display: flex;
   overflow: hidden;
 }
 
