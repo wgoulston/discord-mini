@@ -2,7 +2,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Discord colour palette */
+  /* Discord color palette */
   --blurple:        #5865f2;
   --blurple-hover:  #4752c4;
   --green:          #57f287;

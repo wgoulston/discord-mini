@@ -75,13 +75,16 @@ const els = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Discord has 6 default avatar options (indices 0–5)
+const DISCORD_DEFAULT_AVATAR_COUNT = 6n;
+
 function avatarUrl(user, size = 64) {
   if (!user) return '';
   if (user.avatar) {
     const ext = user.avatar.startsWith('a_') ? 'gif' : 'webp';
     return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${ext}?size=${size}`;
   }
-  return `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % 6n}.png`;
+  return `https://cdn.discordapp.com/embed/avatars/${(BigInt(user.id) >> 22n) % DISCORD_DEFAULT_AVATAR_COUNT}.png`;
 }
 
 function displayName(user) {
@@ -300,7 +303,7 @@ async function openDMChannel(channel) {
 function appendMessage(msg, scroll = true) {
   const isOwn = state.currentUser && msg.author.id === state.currentUser.id;
   const msgList = state.messages[state.activeChannelId] || [];
-  const lastMsg = msgList[msgList.length - 2]; // previous before this
+  const lastMsg = msgList[msgList.length - 1]; // last message before this one
   const isContinuation =
     lastMsg &&
     lastMsg.author.id === msg.author.id &&
@@ -559,6 +562,17 @@ els.btnPin.addEventListener('click', () => {
   state.pinned = !state.pinned;
   els.btnPin.classList.toggle('active', state.pinned);
   discordAPI.togglePin();
+});
+
+// Open external links in the default browser (not in Electron window)
+document.addEventListener('click', (e) => {
+  const anchor = e.target.closest('a[href^="https://"]');
+  if (anchor) {
+    e.preventDefault();
+    // discordAPI.openExternal is not exposed; use a no-op here —
+    // Electron's will.navigate event on the webContents handles this in main.
+    window.open(anchor.href, '_blank');
+  }
 });
 
 // ESC closes modals

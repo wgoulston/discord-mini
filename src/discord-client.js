@@ -8,6 +8,25 @@ const API_BASE = 'discord.com';
 const API_PATH = '/api/v10';
 const GATEWAY_URL = 'wss://gateway.discord.gg/?v=10&encoding=json';
 
+// Discord client properties sent during Gateway Identify.
+// These mimic a standard Discord desktop client to reduce Gateway rejections.
+// Update periodically to match current Discord client releases.
+const CLIENT_PROPERTIES = {
+  os: 'Windows',
+  browser: 'Discord Client',
+  release_channel: 'stable',
+  client_version: '1.0.9163',
+  os_version: '10.0.22621',
+  os_arch: 'x64',
+  app_arch: 'x64',
+  system_locale: 'en-US',
+  browser_user_agent:
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9163 Chrome/120.0.6099.291 Electron/28.2.10 Safari/537.36',
+  browser_version: '28.2.10',
+  client_build_number: 282759,
+  native_build_number: 50744,
+};
+
 const GatewayOpcodes = {
   DISPATCH: 0,
   HEARTBEAT: 1,
@@ -200,21 +219,7 @@ class DiscordClient extends EventEmitter {
     this._send(GatewayOpcodes.IDENTIFY, {
       token: this.token,
       capabilities: 16381,
-      properties: {
-        os: 'Windows',
-        browser: 'Discord Client',
-        release_channel: 'stable',
-        client_version: '1.0.9163',
-        os_version: '10.0.22621',
-        os_arch: 'x64',
-        app_arch: 'x64',
-        system_locale: 'en-US',
-        browser_user_agent:
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9163 Chrome/120.0.6099.291 Electron/28.2.10 Safari/537.36',
-        browser_version: '28.2.10',
-        client_build_number: 282759,
-        native_build_number: 50744,
-      },
+      properties: CLIENT_PROPERTIES,
       presence: { activities: [], status: 'online', since: 0, afk: false },
       compress: false,
     });
