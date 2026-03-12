@@ -54,10 +54,11 @@ function createWindow() {
     height: 520,
     show: false,
     frame: false,
-    transparent: false,
+    transparent: true,
     resizable: true,
     skipTaskbar: true,
     alwaysOnTop: false,
+    hasShadow: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

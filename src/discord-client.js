@@ -319,7 +319,7 @@ class DiscordClient extends EventEmitter {
             if (json.token) {
               resolve(json.token);
             } else if (json.mfa) {
-              reject(new Error('MFA is enabled on this account. Please use your user token instead.'));
+              reject(new Error('MFA is enabled on this account. Please switch to the Token tab and use your user token instead.'));
             } else {
               reject(new Error(json.message || `Login failed (HTTP ${res.statusCode})`));
             }
