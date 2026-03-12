@@ -18,12 +18,20 @@ const $ = (id) => document.getElementById(id);
 const els = {
   loginView:       $('login-view'),
   appView:         $('app-view'),
-  loginForm:       $('login-form'),
+  loginFormCreds:  $('login-form-credentials'),
+  loginFormToken:  $('login-form-token'),
+  loginTabs:       document.querySelectorAll('.login-tab'),
+  emailInput:      $('email-input'),
+  passwordInput:   $('password-input'),
+  passwordToggle:  $('password-toggle'),
+  loginBtnCreds:   $('login-btn-creds'),
+  loginBtnCredsText: $('login-btn-creds-text'),
+  loginSpinnerCreds: $('login-spinner-creds'),
   tokenInput:      $('token-input'),
   tokenToggle:     $('token-toggle'),
-  loginBtn:        $('login-btn'),
-  loginBtnText:    $('login-btn-text'),
-  loginSpinner:    $('login-spinner'),
+  loginBtnToken:   $('login-btn-token'),
+  loginBtnTokenText: $('login-btn-token-text'),
+  loginSpinnerToken: $('login-spinner-token'),
   loginError:      $('login-error'),
 
   dmList:          $('dm-list'),
@@ -138,18 +146,61 @@ function showView(name) {
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
+// Tab switching
+els.loginTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    els.loginTabs.forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+    const mode = tab.dataset.mode;
+    document.querySelectorAll('.login-form').forEach((f) => f.classList.remove('active'));
+    $(`login-form-${mode}`).classList.add('active');
+    setVisible(els.loginError, false);
+  });
+});
+
+// Show/hide password
+els.passwordToggle.addEventListener('click', () => {
+  const isPassword = els.passwordInput.type === 'password';
+  els.passwordInput.type = isPassword ? 'text' : 'password';
+  els.passwordToggle.textContent = isPassword ? '🙈' : '👁';
+  els.passwordToggle.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+});
+
 els.tokenToggle.addEventListener('click', () => {
   const isPassword = els.tokenInput.type === 'password';
   els.tokenInput.type = isPassword ? 'text' : 'password';
   els.tokenToggle.textContent = isPassword ? '🙈' : '👁';
+  els.tokenToggle.setAttribute('aria-label', isPassword ? 'Hide token' : 'Show token');
 });
 
-els.loginForm.addEventListener('submit', async (e) => {
+// Email / password form submit
+els.loginFormCreds.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = els.emailInput.value.trim();
+  const password = els.passwordInput.value;
+  if (!email || !password) return;
+
+  setLoginLoading('creds', true);
+  setVisible(els.loginError, false);
+
+  const result = await discordAPI.loginWithCredentials(email, password);
+  if (result.success) {
+    state.currentUser = result.user;
+    onLoggedIn();
+  } else {
+    els.loginError.textContent = result.error || 'Login failed. Please try again.';
+    setVisible(els.loginError, true);
+    setLoginLoading('creds', false);
+  }
+});
+
+// Token form submit
+els.loginFormToken.addEventListener('submit', async (e) => {
   e.preventDefault();
   const token = els.tokenInput.value.trim();
   if (!token) return;
 
-  setLoginLoading(true);
+  setLoginLoading('token', true);
   setVisible(els.loginError, false);
 
   const result = await discordAPI.login(token);
@@ -159,14 +210,20 @@ els.loginForm.addEventListener('submit', async (e) => {
   } else {
     els.loginError.textContent = result.error || 'Login failed. Check your token.';
     setVisible(els.loginError, true);
-    setLoginLoading(false);
+    setLoginLoading('token', false);
   }
 });
 
-function setLoginLoading(loading) {
-  els.loginBtn.disabled = loading;
-  setVisible(els.loginBtnText, !loading);
-  setVisible(els.loginSpinner, loading);
+function setLoginLoading(mode, loading) {
+  if (mode === 'creds') {
+    els.loginBtnCreds.disabled = loading;
+    setVisible(els.loginBtnCredsText, !loading);
+    setVisible(els.loginSpinnerCreds, loading);
+  } else {
+    els.loginBtnToken.disabled = loading;
+    setVisible(els.loginBtnTokenText, !loading);
+    setVisible(els.loginSpinnerToken, loading);
+  }
 }
 
 // ─── Post-login setup ─────────────────────────────────────────────────────────
@@ -548,6 +605,8 @@ async function logout() {
   discordAPI.removeAllListeners('typingStart');
 
   // Reset UI
+  els.emailInput.value = '';
+  els.passwordInput.value = '';
   els.tokenInput.value = '';
   setVisible(els.loginError, false);
   setVisible(els.settingsOverlay, false);

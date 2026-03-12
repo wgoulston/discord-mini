@@ -6,6 +6,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('discordAPI', {
   // Auth
   login: (token) => ipcRenderer.invoke('discord:login', token),
+  loginWithCredentials: (email, password) => ipcRenderer.invoke('discord:loginWithCredentials', email, password),
   logout: () => ipcRenderer.invoke('discord:logout'),
 
   // Data

@@ -109,37 +109,65 @@ body {
 #login-card {
   background: var(--bg-2);
   border-radius: 5px;
-  padding: 32px 40px;
+  padding: 24px 28px;
   width: 100%;
-  max-width: 400px;
+  max-width: 340px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
-#login-logo { color: var(--blurple); margin-bottom: 4px; }
+#login-logo { color: var(--blurple); margin-bottom: 2px; }
 
 #login-card h2 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-header);
+  margin-bottom: 2px;
 }
 
-.login-subtitle {
-  color: var(--text-muted);
-  font-size: 14px;
-  text-align: center;
-}
-
-#login-form {
+/* ─── Login tabs ────────────────────────────────────────────────────────────── */
+#login-tabs {
   display: flex;
+  gap: 0;
+  width: 100%;
+  background: var(--bg-1);
+  border-radius: 4px;
+  padding: 3px;
+}
+
+.login-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.login-tab.active {
+  background: var(--bg-4);
+  color: var(--text-normal);
+}
+
+.login-tab:hover:not(.active) { color: var(--text-normal); }
+
+/* ─── Login forms ───────────────────────────────────────────────────────────── */
+.login-form {
+  display: none;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
 }
 
-#login-form label {
+.login-form.active { display: flex; }
+
+.login-form label {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -158,7 +186,8 @@ body {
   padding-right: 36px;
 }
 
-#token-toggle {
+#token-toggle,
+#password-toggle {
   position: absolute;
   right: 8px;
   background: none;
@@ -169,7 +198,8 @@ body {
   padding: 0;
   line-height: 1;
 }
-#token-toggle:hover { color: var(--text-normal); }
+#token-toggle:hover,
+#password-toggle:hover { color: var(--text-normal); }
 
 .hint {
   color: var(--text-muted);
