@@ -50,14 +50,15 @@ function createTray() {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 820,
-    height: 600,
+    width: 720,
+    height: 520,
     show: false,
     frame: false,
-    transparent: false,
+    transparent: true,
     resizable: true,
     skipTaskbar: true,
     alwaysOnTop: false,
+    hasShadow: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -110,34 +111,50 @@ function positionWindow() {
 
 function setupIPC() {
   // ── Auth ────────────────────────────────────────────────────────────────────
+
+  /** Attach real-time event forwarders from the Discord client to the renderer. */
+  function attachClientEvents() {
+    client.on('message', (msg) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('discord:message', msg);
+      }
+    });
+    client.on('dmCreated', (ch) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('discord:dmCreated', ch);
+      }
+    });
+    client.on('typingStart', (data) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('discord:typingStart', data);
+      }
+    });
+    client.on('relationshipAdd', (data) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('discord:relationshipAdd', data);
+      }
+    });
+  }
+
   ipcMain.handle('discord:login', async (_event, token) => {
     try {
       if (client) client.disconnect();
       client = new DiscordClient(token);
       const user = await client.login();
+      attachClientEvents();
+      return { success: true, user };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
 
-      // Forward real-time events to renderer
-      client.on('message', (msg) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('discord:message', msg);
-        }
-      });
-      client.on('dmCreated', (ch) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('discord:dmCreated', ch);
-        }
-      });
-      client.on('typingStart', (data) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('discord:typingStart', data);
-        }
-      });
-      client.on('relationshipAdd', (data) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('discord:relationshipAdd', data);
-        }
-      });
-
+  ipcMain.handle('discord:loginWithCredentials', async (_event, email, password) => {
+    try {
+      if (client) client.disconnect();
+      const token = await DiscordClient.getTokenFromCredentials(email, password);
+      client = new DiscordClient(token);
+      const user = await client.login();
+      attachClientEvents();
       return { success: true, user };
     } catch (err) {
       return { success: false, error: err.message };

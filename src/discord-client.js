@@ -292,6 +292,49 @@ class DiscordClient extends EventEmitter {
     return this.user;
   }
 
+  /**
+   * Exchange email/password credentials for a user token.
+   * Returns the token string on success, or throws an error.
+   */
+  static getTokenFromCredentials(email, password) {
+    return new Promise((resolve, reject) => {
+      const data = JSON.stringify({ login: email, password, undelete: false });
+      const options = {
+        hostname: API_BASE,
+        path: `${API_PATH}/auth/login`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'DiscordMini/1.0.0 (discord-mini)',
+          'Content-Length': Buffer.byteLength(data),
+        },
+      };
+
+      const req = https.request(options, (res) => {
+        let raw = '';
+        res.on('data', (chunk) => (raw += chunk));
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(raw);
+            if (json.token) {
+              resolve(json.token);
+            } else if (json.mfa) {
+              reject(new Error('MFA is enabled on this account. Please switch to the Token tab and use your user token instead.'));
+            } else {
+              reject(new Error(json.message || `Login failed (HTTP ${res.statusCode})`));
+            }
+          } catch {
+            reject(new Error(`HTTP ${res.statusCode}: ${raw}`));
+          }
+        });
+      });
+
+      req.on('error', reject);
+      req.write(data);
+      req.end();
+    });
+  }
+
   /** Disconnect from gateway */
   disconnect() {
     this._clearHeartbeat();
